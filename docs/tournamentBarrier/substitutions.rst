@@ -1,0 +1,2 @@
+.. |DistAlgName| replace:: Tournament barrier
+

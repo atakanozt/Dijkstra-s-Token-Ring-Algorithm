@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Distributed Algorithm on AHCv2: Dijkstra`s Token Ring Algorithm'
+project = 'Distributed Algorithm on AHCv2: Tournament barrier'
 copyright = '2024, Atakan Öztarak'
 author = 'Atakan Öztarak'
 release = 'V1.0.0'

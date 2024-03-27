@@ -12,9 +12,9 @@
    :maxdepth: 2
    :caption: Contents
 
-   docs/dijkstraTokenRingAlgorithm/dijkstraTokenRingAlgorithm
+   docs/tournamentBarrier/dijkstraTokenRingAlgorithm
    docs/rubric
-   docs/dijkstraTokenRingAlgorithm/code
+   docs/tournamentBarrier/code
 
 .. ATTENTION::
    For RST details, please refer to `reStructuredText Documentation <https://docutils.sourceforge.io/rst.html>`_.
