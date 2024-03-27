@@ -6,124 +6,132 @@
 
 
 Background and Related Work
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Present any background information survey the related work. Provide citations.
+Efficient synchronization in concurrent computing is essential for the consistency and correctness of parallel applications. Barrier synchronization mechanisms are central to ensuring that all threads or processes in a shared memory system reach a predefined point in their execution before any can continue. Among various synchronization methods, the tournament barrier has emerged as a notable approach due to its structured and scalable nature.
 
-Distributed Algorithm: |DistAlgName| 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Tournament Barrier**
 
-An example distributed algorithm for broadcasting on an undirected graph is presented in  :ref:`Algorithm <BlindFloodingAlgorithmLabel>`.
+The tournament barrier utilizes a tree structure for organizing thread synchronization, drawing on the concept of tournament trees where processes compete in pairs. This method stands out for its predetermined matchups and hierarchical signaling process, which minimizes contention and scales effectively with the number of threads [Shavit1997]_.
 
-.. _BlindFloodingAlgorithmLabel:
+**Related Work**
+
+Several barrier synchronization techniques have been proposed, each with its own set of advantages and limitations:
+
+- *Centralized barriers* suffer from scalability issues due to high contention with increasing thread counts.
+- *Dissemination barriers* distribute synchronization in rounds, reducing contention but adding complexity.
+- The *MCS (Mellor-Crummey and Scott) barrier* organizes threads in a tree structure, offering a balance between contention reduction and complexity [MellorCrummey1991]_.
+
+The tournament barrier's approach to synchronization, predetermining matchups and employing a cascading wake-up process, offers a promising solution to the scalability and efficiency challenges faced by other barrier mechanisms. This study builds upon the foundational works by Mellor-Crummey and Scott, as well as Shavit and Touitou, to explore the nuances and performance implications of tournament barriers in high-concurrency environments.
+
+.. [MellorCrummey1991] Mellor-Crummey, J. M., & Scott, M. L. (1991). "Algorithms for Scalable Synchronization on Shared-Memory Multiprocessors".
+
+
+
+Distributed Algorithm: |DistAlgName|
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An example distributed algorithm for implementing a tournament barrier on a shared memory system is presented in :ref:`Algorithm <TournamentBarrierAlgorithmLabel>`.
+
+.. _TournamentBarrierAlgorithmLabel:
 
 .. code-block:: RST
     :linenos:
-    :caption: Blind flooding algorithm.
-    
+    :caption: Tournament barrier algorithm.
 
-    Implements: BlindFlooding Instance: cf
-    Uses: LinkLayerBroadcast Instance: lbc
-    Events: Init, MessageFromTop, MessageFromBottom
+    Implements: TournamentBarrier Instance: tb
+    Uses: MemoryReadWrite, ThreadManagement
+    Events: ReachBarrier, LeaveBarrier
     Needs:
 
-    OnInit: () do
-    
-    OnMessageFromBottom: ( m ) do
-        Trigger lbc.Broadcast ( m )
-    
-    OnMessageFromTop: ( m ) do
-        Trigger lbc.Broadcast ( m )
+    OnReachBarrier: (threadId) do
+        round = 1
+        while not isFinalRound(threadId, round) do
+            opponentThreadId = findOpponent(threadId, round)
+            if isWinner(threadId, opponentThreadId) then
+                waitForOpponent(opponentThreadId)
+            else
+                signalWinner(opponentThreadId)
+                waitUntilRoundComplete(round)
+                exit
+            end if
+            round = round + 1
+        done
+        if isLastThread(threadId) then
+            signalAllThreadsLeaveBarrier()
+        else
+            waitForSignalLeaveBarrier()
+        end if
 
+    OnLeaveBarrier: () do
+        resetBarrierState()
 
-Do not forget to explain the algorithm line by line in the text.
+The algorithm above outlines the tournament barrier mechanism, where threads synchronize at barrier points before proceeding. It operates on a simple principle: each thread is paired with another in a tournament-style matchup, where only one (the winner) proceeds to the next round. This process repeats until a final winner is determined, who then signals all threads to leave the barrier.
+
+Explanation:
+
+1. **Line 1-3:** Defines the algorithm, its instance, and dependencies.
+2. **Line 5-6:** Event triggered when a thread reaches the barrier point.
+3. **Line 7:** Initialization of the round counter.
+4. **Line 8-20:** Main loop where each thread checks if it has reached the final round.
+5. **Line 9-10:** Determining the opponent thread based on the current round and thread ID.
+6. **Line 11-15:** The winner waits for the loser to signal completion, while the loser signals the winner and waits for the round to complete.
+7. **Line 16-17:** Increment the round counter.
+8. **Line 21-26:** The last thread signals all others to proceed, while others wait for this signal.
+9. **Line 28-29:** Resets the state of the barrier once all threads have left.
 
 Example
-~~~~~~~~
+~~~~~~~
 
-Provide an example for the distributed algorithm.
+Consider a scenario with 8 threads reaching a synchronization point in a shared memory system. The threads are organized into a binary tree structure for the tournament, with each node representing a thread. In the first round, threads are paired (1 vs 2, 3 vs 4, etc.), with one thread from each pair proceeding to the next round after synchronization. This process continues until the final round, where the last remaining thread signals all threads to proceed past the barrier. This example demonstrates the efficiency of the tournament barrier in reducing contention and organizing thread synchronization in a scalable and structured manner.
+
 
 Correctness
 ~~~~~~~~~~~
 
-Present Correctness, safety, liveness and fairness proofs.
+The tournament barrier algorithm ensures that no thread proceeds beyond the barrier until every thread has reached the barrier, maintaining the integrity of synchronized operations in shared memory systems.
 
+**Safety**
 
-Complexity 
+The algorithm guarantees safety by preventing any thread from proceeding past the barrier until all threads have arrived. This is enforced through the tournament mechanism, where threads compete in pairs and only the winners advance. The ultimate winner, the last thread to win the tournament, signals all threads to proceed, ensuring no thread moves ahead prematurely.
+
+.. code-block:: rst
+
+    Safety is ensured as each thread must either win against its opponent or wait for a signal from its opponent, ensuring that no thread can bypass the barrier without all threads reaching it.
+
+**Liveness**
+
+Liveness is guaranteed as every thread that reaches the barrier will eventually be allowed to proceed. The algorithm's design, where each loser waits for a signal from its victorious opponent and the final winner signals all threads to continue, ensures no thread is indefinitely blocked.
+
+.. code-block:: rst
+
+    Liveness is achieved through a structured signaling mechanism, ensuring every waiting thread eventually receives a signal to proceed.
+
+**Fairness**
+
+The tournament barrier algorithm promotes fairness by ensuring that each thread has an equal opportunity to progress in the tournament structure. While the mechanism of winning and signaling is based on predefined matchups, every thread contributes to the synchronization process and will eventually pass the barrier.
+
+.. code-block:: rst
+
+    Fairness is inherent as each thread plays a role in the barrier's operation, either by winning and signaling or by waiting and then proceeding once signaled.
+
+Complexity
 ~~~~~~~~~~
 
-Present theoretic complexity results in terms of number of messages and computational complexity.
+The theoretical complexity of the tournament barrier algorithm can be analyzed in terms of the number of messages and computational complexity.
 
+**Number of Messages**
 
+In a system with *n* threads, the total number of messages sent is proportional to *n-1*, corresponding to the number of matches in a complete binary tournament. Each match results in a signal being sent, either for synchronization (loser to winner) or for signaling completion (winner to all).
 
+.. code-block:: rst
 
-.. admonition:: EXAMPLE 
+    The total number of messages is O(n), where n is the number of participating threads.
 
-    Snapshot algorithms are fundamental tools in distributed systems, enabling the capture of consistent global states during system execution. These snapshots provide insights into the system's behavior, facilitating various tasks such as debugging, recovery from failures, and monitoring for properties like deadlock or termination. In this section, we delve into snapshot algorithms, focusing on two prominent ones: the Chandy-Lamport algorithm and the Lai-Yang algorithm. We will present the principles behind these algorithms, their implementation details, and compare their strengths and weaknesses.
+**Computational Complexity**
 
-    **Chandy-Lamport Snapshot Algorithm:**
+The computational complexity primarily revolves around the operations each thread performs to determine its opponent, win or lose a match, and signal other threads. Since these operations are executed once per round for a logarithmic number of rounds (log n), the overall computational complexity is O(log n).
 
-    The Chandy-Lamport :ref:`Algorithm <ChandyLamportSnapshotAlgorithm>` [Lamport1985]_ , proposed by Leslie Lamport and K. Mani Chandy, aims to capture a consistent global state of a distributed system without halting its execution. It operates by injecting markers into the communication channels between processes, which propagate throughout the system, collecting local states as they traverse. Upon reaching all processes, these markers signify the completion of a global snapshot. This algorithm requires FIFO channels. There are no failures and all messages arrive intact and only once. Any process may initiate the snapshot algorithm. The snapshot algorithm does not interfere with the normal execution of the processes. Each process in the system records its local state and the state of its incoming channels.
+.. code-block:: rst
 
-    1. **Marker Propagation:** When a process initiates a snapshot, it sends markers along its outgoing communication channels.
-    2. **Recording Local States:** Each process records its local state upon receiving a marker and continues forwarding it.
-    3. **Snapshot Construction:** When a process receives markers from all incoming channels, it captures its local state along with the incoming messages as a part of the global snapshot.
-    4. **Termination Detection:** The algorithm ensures that all markers have traversed the system, indicating the completion of the snapshot.
-
-
-    .. _ChandyLamportSnapshotAlgorithm:
-
-    .. code-block:: RST
-        :linenos:
-        :caption: Chandy-Lamport Snapshot Algorithm [Fokking2013]_.
-                
-        bool recordedp, markerp[c] for all incoming channels c of p; 
-        mess-queue statep[c] for all incoming channels c of p;
-
-        If p wants to initiate a snapshot 
-            perform procedure TakeSnapshotp;
-
-        If p receives a basic message m through an incoming channel c0
-        if recordedp = true and markerp[c0] = false then 
-            statep[c0] ← append(statep[c0],m);
-        end if
-
-        If p receives ⟨marker⟩ through an incoming channel c0
-            perform procedure TakeSnapshotp;
-            markerp[c0] ← true;
-            if markerp[c] = true for all incoming channels c of p then
-                terminate; 
-            end if
-
-        Procedure TakeSnapshotp
-        if recordedp = false then
-            recordedp ← true;
-            send ⟨marker⟩ into each outgoing channel of p; 
-            take a local snapshot of the state of p;
-        end if
-
-
-    **Example**
-
-    DRAW FIGURES REPRESENTING THE EXAMPLE AND EXPLAIN USING THE FIGURE. Imagine a distributed system with three processes, labeled Process A, Process B, and Process C, connected by communication channels. When Process A initiates a snapshot, it sends a marker along its outgoing channel. Upon receiving the marker, Process B marks its local state and forwards the marker to Process C. Similarly, Process C marks its state upon receiving the marker. As the marker propagates back through the channels, each process records the messages it sends or receives after marking its state. Finally, once the marker returns to Process A, it collects the markers and recorded states from all processes to construct a consistent global snapshot of the distributed system. This example demonstrates how the Chandy-Lamport algorithm captures a snapshot without halting the system's execution, facilitating analysis and debugging in distributed environments.
-
-
-    **Correctness:**
-    
-    *Termination (liveness)*: As each process initiates a snapshot and sends at most one marker message, the snapshot algorithm activity terminates within a finite timeframe. If process p has taken a snapshot by this point, and q is a neighbor of p, then q has also taken a snapshot. This is because the marker message sent by p has been received by q, prompting q to take a snapshot if it hadn't already done so. Since at least one process initiated the algorithm, at least one process has taken a snapshot; moreover, the network's connectivity ensures that all processes have taken a snapshot [Tel2001]_.
-
-    *Correctness*: We need to demonstrate that the resulting snapshot is feasible, meaning that each post-shot (basic) message is received during a post-shot event. Consider a post-shot message, denoted as m, sent from process p to process q. Before transmitting m, process p captured a local snapshot and dispatched a marker message to all its neighbors, including q. As the channels are FIFO (first-in-first-out), q received this marker message before receiving m. As per the algorithm's protocol, q took its snapshot upon receiving this marker message or earlier. Consequently, the receipt of m by q constitutes a post-shot event [Tel2001]_.
-
-    **Complexity:**
-
-    1. **Time Complexity**  The Chandy-Lamport :ref:`Algorithm <ChandyLamportSnapshotAlgorithm>` takes at most O(D) time units to complete where D is ...
-    2. **Message Complexity:** The Chandy-Lamport :ref:`Algorithm <ChandyLamportSnapshotAlgorithm>` requires 2|E| control messages.
-
-
-    **Lai-Yang Snapshot Algorithm:**
-
-    The Lai-Yang algorithm also captures a consistent global snapshot of a distributed system. Lai and Yang proposed a modification of Chandy-Lamport's algorithm for distributed snapshot on a network of processes where the channels need not be FIFO. ALGORTHM, FURTHER DETAILS
-
-.. [Fokking2013] Wan Fokkink, Distributed Algorithms An Intuitive Approach, The MIT Press Cambridge, Massachusetts London, England, 2013
-.. [Tel2001] Gerard Tel, Introduction to Distributed Algorithms, CAMBRIDGE UNIVERSITY PRESS, 2001
-.. [Lamport1985] Leslie Lamport, K. Mani Chandy: Distributed Snapshots: Determining Global States of a Distributed System. In: ACM Transactions on Computer Systems 3. Nr. 1, Februar 1985.
+    The computational complexity for each thread is O(log n), with n being the total number of threads.

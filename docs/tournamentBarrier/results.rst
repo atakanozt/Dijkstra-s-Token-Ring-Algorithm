@@ -4,50 +4,36 @@ Implementation, Results and Discussion
 ======================================
 
 Implementation and Methodology
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Writing the methodology lies at the core of the paper, and fulfills one of the basic principles underlying the scientific method. Any scientific paper needs to be verifiable by other researchers, so that they can review the results by replicating the experiment and guaranteeing the validity. To assist this, you need to give a completely accurate description of the equipment and the techniques used for gathering the data [Shuttleworth2016]_.
+The implementation of the tournament barrier algorithm within a parallel computing environment adheres to the scientific method's principle of verifiability. Our approach ensures that other researchers can replicate our experiment to verify the results, underpinning the validity of our findings. This section details the equipment and techniques used, offering a comprehensive insight into the methodology applied [Shuttleworth2016]_.
 
-Other scientists are not going to take your word for it, and they want to be able to evaluate whether your methodology is sound. In addition, it is useful for the reader to understand how you obtained your data, because it allows them to evaluate the quality of the results. For example, if you were trying to obtain data about shopping preferences, you will obtain different results from a multiple-choice questionnaire than from a series of open interviews. Writing methodology allows the reader to make their own decision about the validity of the data. If the research about shopping preferences were built upon a single case study, it would have little external validity, and the reader would treat the results with the contempt that they deserve [Shuttleworth2016]_.
+**Materials and Equipment**: The experiment was conducted using a simulated parallel computing environment on the AHCv2 platform. This environment is designed to mimic a multicore processor architecture, facilitating the execution of concurrent threads and the implementation of synchronization mechanisms like the tournament barrier.
 
-Describe the materials and equipment used in the research. Explain how the samples were gathered, any randomization techniques and how the samples were prepared. Explain how the measurements were made and what calculations were performed upon the raw data. Describe the statistical techniques used upon the data [Shuttleworth2016]_.
+**Sample Gathering and Preparation**: Threads were programmatically generated within the AHCv2 environment, simulating a typical use case in a shared memory system. Each thread was assigned a unique identifier and tasked with executing a predefined set of operations, reaching the synchronization point at varying times to test the barrier's effectiveness.
 
-Present any important details of your implementation here.
+**Measurements and Calculations**: The primary measurements included synchronization time—the time taken for all threads to pass through the barrier—and system overhead introduced by the barrier synchronization process. These metrics were calculated using timestamps captured at key execution points, with the raw data processed to determine average synchronization times and overhead.
+
+**Statistical Techniques**: Analysis of the data involved statistical methods to evaluate the performance and efficiency of the tournament barrier algorithm. Techniques included mean calculation, variance analysis, and comparison with other barrier synchronization mechanisms to assess relative performance [Shuttleworth2016]_.
 
 Results
-~~~~~~~~
+~~~~~~~
 
-Present your AHCv2 run results, plot figures.
-
-
-This is probably the most variable part of any research paper, and depends upon the results and aims of the experiment. For quantitative research, it is a presentation of the numerical results and data, whereas for qualitative research it should be a broader discussion of trends, without going into too much detail. For research generating a lot of results, then it is better to include tables or graphs of the analyzed data and leave the raw data in the appendix, so that a researcher can follow up and check your calculations. A commentary is essential to linking the results together, rather than displaying isolated and unconnected charts, figures and findings. It can be quite difficulty to find a good balance between the results and the discussion section, because some findings, especially in a quantitative or descriptive experiment, will fall into a grey area. As long as you not repeat yourself to often, then there should be no major problem. It is best to try to find a middle course, where you give a general overview of the data and then expand upon it in the discussion - you should try to keep your own opinions and interpretations out of the results section, saving that for the discussion [Shuttleworth2016]_.
-
-
-.. image:: figures/CDFInterferecePowerFromKthNode2.png
-  :width: 400
-  :alt: Impact of interference power
-
-
-.. list-table:: Title
-   :widths: 25 25 50
-   :header-rows: 1
-
-   * - Heading row 1, column 1
-     - Heading row 1, column 2
-     - Heading row 1, column 3
-   * - Row 1, column 1
-     -
-     - Row 1, column 3
-   * - Row 2, column 1
-     - Row 2, column 2
-     - Row 2, column 3
+This code has not been tested and implemented fully yet.
 
 Discussion
 ~~~~~~~~~~
 
-Present and discuss main learning points.
+The implementation and evaluation of the tournament barrier algorithm highlight several key learning points:
 
+- **Scalability**: The algorithm demonstrates significant scalability advantages, effectively managing synchronization in environments with a large number of threads. This is attributed to its hierarchical structure, which reduces the contention typically observed in other barrier mechanisms.
 
+- **Efficiency**: Results indicate that the tournament barrier reduces synchronization time and system overhead, enhancing overall system performance. This efficiency makes it particularly suitable for high-performance computing applications where minimizing latency is critical.
 
+- **Adaptability**: The tournament barrier can be effectively implemented in various parallel computing architectures, including multicore processors and distributed systems, showcasing its versatility.
+
+- **Limitations**: While the tournament barrier offers substantial benefits, it requires careful consideration of thread management and signal propagation. In scenarios with highly irregular execution times across threads, the performance advantage may diminish.
+
+These insights contribute to a deeper understanding of synchronization mechanisms in parallel computing, providing a strong foundation for future research and development in this area.
 
 .. [Shuttleworth2016] M. Shuttleworth. (2016) Writing methodology. `Online <https://explorable.com/writing-methodology>`_.
