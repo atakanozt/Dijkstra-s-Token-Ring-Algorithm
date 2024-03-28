@@ -24,16 +24,6 @@ This code has not been tested and implemented fully yet.
 Discussion
 ~~~~~~~~~~
 
-The implementation and evaluation of the tournament barrier algorithm highlight several key learning points:
-
-- **Scalability**: The algorithm demonstrates significant scalability advantages, effectively managing synchronization in environments with a large number of threads. This is attributed to its hierarchical structure, which reduces the contention typically observed in other barrier mechanisms.
-
-- **Efficiency**: Results indicate that the tournament barrier reduces synchronization time and system overhead, enhancing overall system performance. This efficiency makes it particularly suitable for high-performance computing applications where minimizing latency is critical.
-
-- **Adaptability**: The tournament barrier can be effectively implemented in various parallel computing architectures, including multicore processors and distributed systems, showcasing its versatility.
-
-- **Limitations**: While the tournament barrier offers substantial benefits, it requires careful consideration of thread management and signal propagation. In scenarios with highly irregular execution times across threads, the performance advantage may diminish.
-
-These insights contribute to a deeper understanding of synchronization mechanisms in parallel computing, providing a strong foundation for future research and development in this area.
+This part cannot be discussed for now.
 
 .. [Shuttleworth2016] M. Shuttleworth. (2016) Writing methodology. `Online <https://explorable.com/writing-methodology>`_.
