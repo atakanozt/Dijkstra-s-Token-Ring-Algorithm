@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. include:: docs/dijkstraTokenRingAlgorithm/substitutions.rst
+.. include:: docs/tournamentBarrier/substitutions.rst
 
 |DistAlgName|
 =======================================================================================
@@ -12,7 +12,7 @@
    :maxdepth: 2
    :caption: Contents
 
-   docs/tournamentBarrier/dijkstraTokenRingAlgorithm
+   docs/tournamentBarrier/tournamentBarrier
    docs/rubric
    docs/tournamentBarrier/code
 
