@@ -10,6 +10,10 @@ Reference:
 
 import random
 
+from ahc.adhoccomputing.GenericModel import GenericModel
+from ahc.adhoccomputing.Generics import Event, EventTypes
+
+
 def initialize_ring(n, k):
     """
     Initializes a ring of n machines with random states from 0 to k-1.
@@ -23,6 +27,7 @@ def initialize_ring(n, k):
     """
     return [random.randint(0, k - 1) for _ in range(n)]
 
+
 def display_ring(ring):
     """
     Displays the current state of the ring.
@@ -31,6 +36,7 @@ def display_ring(ring):
         ring (list): List of integers representing the state of each machine.
     """
     print("Ring state:", ring)
+
 
 def update_machine(ring, index, k):
     """
@@ -60,6 +66,7 @@ def update_machine(ring, index, k):
             ring[index] = ring[left_neighbor]
             return True
     return False
+
 
 def simulate_k_state_machines(n, k, steps=100):
     """
@@ -92,3 +99,28 @@ def simulate_k_state_machines(n, k, steps=100):
     print("Final state after", step, "steps:")
     display_ring(ring)
 
+
+class KStateMachineComponent(GenericModel):
+    def __init__(self, componentname, componentid, n, k, topology=None):
+        super().__init__(componentname, componentid, topology=topology)
+        self.n = n
+        self.k = k
+        self.ring = initialize_ring(self.n, self.k)
+
+    def on_init(self, eventobj: Event):
+        print(f"K-State Machine {self.componentname}.{self.componentinstancenumber} initialized with ring: {self.ring}")
+        display_ring(self.ring)
+
+    def perform_step(self):
+        # Randomly select one machine to update
+        simulate_k_state_machines(self.n, self.k, 100)
+
+        # selected_machine = random.randint(0, self.n - 1)
+        # if update_machine(self.ring, selected_machine, self.k):
+        #     print(f"Machine {selected_machine} updated to state {self.ring[selected_machine]}")
+        #     return True
+        # return False
+
+    def on_clock_tick(self, eventobj: Event):
+        if self.perform_step():
+            self.send_up(Event(self, EventTypes.MFRB, self.ring))
